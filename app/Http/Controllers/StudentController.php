@@ -19,7 +19,7 @@ class StudentController extends Controller
         ], 200);
     }
 
-    // GET /api/students/{id} - Retrieve single student
+  
     public function show($id)
     {
         $student = Student::find($id);
@@ -38,7 +38,7 @@ class StudentController extends Controller
         ], 200);
     }
 
-    // POST /api/students - Create new student
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -59,7 +59,7 @@ class StudentController extends Controller
         ], 201);
     }
 
-    // PUT /api/students/{id} - Update student
+    
     public function update(Request $request, $id)
     {
         $student = Student::find($id);
@@ -89,7 +89,7 @@ class StudentController extends Controller
         ], 200);
     }
 
-    // DELETE /api/students/{id} - Delete student
+    
     public function destroy($id)
     {
         $student = Student::find($id);
