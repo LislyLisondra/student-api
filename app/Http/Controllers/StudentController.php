@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    // GET /api/students - Retrieve all students
+    
     public function index()
     {
         $students = Student::all();
@@ -15,11 +15,11 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Students retrieved successfully',
-            'data' => $students
+            'data'    => $students,
         ], 200);
     }
 
-  
+    
     public function show($id)
     {
         $student = Student::find($id);
@@ -27,20 +27,27 @@ class StudentController extends Controller
         if (!$student) {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found'
+                'message' => 'Student not found',
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Student retrieved successfully',
-            'data' => $student
+            'data'    => $student,
         ], 200);
     }
 
-    
+   
     public function store(Request $request)
     {
+        if (!$request->user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. Administrators only.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name'  => 'required|string|max:100',
@@ -55,19 +62,26 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Student created successfully',
-            'data' => $student
+            'data'    => $student,
         ], 201);
     }
 
-    
+   
     public function update(Request $request, $id)
     {
+        if (!$request->user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. Administrators only.',
+            ], 403);
+        }
+
         $student = Student::find($id);
 
         if (!$student) {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found'
+                'message' => 'Student not found',
             ], 404);
         }
 
@@ -85,19 +99,26 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Student updated successfully',
-            'data' => $student
+            'data'    => $student,
         ], 200);
     }
 
-    
-    public function destroy($id)
+  
+    public function destroy(Request $request, $id)
     {
+        if (!$request->user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. Administrators only.',
+            ], 403);
+        }
+
         $student = Student::find($id);
 
         if (!$student) {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found'
+                'message' => 'Student not found',
             ], 404);
         }
 
@@ -105,7 +126,7 @@ class StudentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Student deleted successfully'
+            'message' => 'Student deleted successfully',
         ], 200);
     }
 }
