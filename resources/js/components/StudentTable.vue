@@ -1,5 +1,5 @@
 <script setup>
-// Data comes IN through props, actions go OUT through emits
+
 defineProps({
     students: { type: Array, required: true },
     isAdmin: { type: Boolean, default: false },

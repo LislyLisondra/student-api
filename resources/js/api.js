@@ -1,9 +1,9 @@
 import { ref } from 'vue';
 
-// Details of the most recent API call, so the UI can show the Bearer token in action
+
 export const lastRequest = ref(null);
 
-// One place that talks to the Laravel API and attaches the Sanctum bearer token
+
 export async function request(method, url, body) {
     const token = localStorage.getItem('token');
 
