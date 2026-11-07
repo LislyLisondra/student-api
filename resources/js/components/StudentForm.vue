@@ -2,7 +2,7 @@
 import { reactive, watch } from 'vue';
 
 const props = defineProps({
-    student: { type: Object, default: null }, // null = adding, object = editing
+    student: { type: Object, default: null },
     errors: { type: Object, default: () => ({}) },
     saving: { type: Boolean, default: false },
 });
@@ -22,7 +22,7 @@ const blank = () => ({
 });
 const form = reactive(blank());
 
-// Fill the form whenever a different student is selected
+
 watch(
     () => props.student,
     (s) => {

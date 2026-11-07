@@ -22,8 +22,8 @@ function notify(type, text) {
 }
 
 function handleError(e) {
-    if (e.status === 401) return emit('unauthorized'); // token missing or revoked
-    if (e.status === 422) formErrors.value = e.errors || {}; // validation errors
+    if (e.status === 401) return emit('unauthorized'); 
+    if (e.status === 422) formErrors.value = e.errors || {}; 
     notify('error', e.message);
 }
 
