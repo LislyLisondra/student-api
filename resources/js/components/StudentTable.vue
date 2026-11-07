@@ -1,8 +1,9 @@
 <script setup>
-
+// Data comes IN through props, actions go OUT through emits
 defineProps({
     students: { type: Array, required: true },
     isAdmin: { type: Boolean, default: false },
+    deletingId: { type: Number, default: null },
 });
 defineEmits(['edit', 'delete']);
 </script>
@@ -16,9 +17,8 @@ defineEmits(['edit', 'delete']);
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
+                    <th>#</th>
+                    <th>Student</th>
                     <th>Course</th>
                     <th>Year</th>
                     <th>GPA</th>
@@ -27,15 +27,28 @@ defineEmits(['edit', 'delete']);
             </thead>
             <tbody>
                 <tr v-for="s in students" :key="s.id">
-                    <td>{{ s.id }}</td>
-                    <td>{{ s.first_name }} {{ s.last_name }}</td>
-                    <td>{{ s.email }}</td>
+                    <td class="muted">{{ s.id }}</td>
+                    <td>
+                        <div class="student-cell">
+                            <span class="avatar">{{ s.first_name?.[0] }}{{ s.last_name?.[0] }}</span>
+                            <div>
+                                <strong>{{ s.first_name }} {{ s.last_name }}</strong>
+                                <small>{{ s.email }}</small>
+                            </div>
+                        </div>
+                    </td>
                     <td>{{ s.course }}</td>
-                    <td>{{ s.year_level }}</td>
-                    <td>{{ s.gpa ?? 'N/A' }}</td>
+                    <td><span class="chip">Year {{ s.year_level }}</span></td>
+                    <td><span class="chip">{{ s.gpa ?? 'N/A' }}</span></td>
                     <td v-if="isAdmin" class="actions">
                         <button class="btn small" @click="$emit('edit', s)">Edit</button>
-                        <button class="btn small danger" @click="$emit('delete', s)">Delete</button>
+                        <button
+                            class="btn small danger"
+                            :disabled="deletingId === s.id"
+                            @click="$emit('delete', s)"
+                        >
+                            {{ deletingId === s.id ? 'Deleting...' : 'Delete' }}
+                        </button>
                     </td>
                 </tr>
             </tbody>
