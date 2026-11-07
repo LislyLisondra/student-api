@@ -1,43 +1,21 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { request } from '../api';
+import { useAuth } from '../composables/useAuth';
+import { useStudents } from '../composables/useStudents';
+import SessionPanel from './SessionPanel.vue';
 import StudentTable from './StudentTable.vue';
 import StudentForm from './StudentForm.vue';
 import AlertMessage from './AlertMessage.vue';
 
-defineProps({ isAdmin: { type: Boolean, default: false } });
-const emit = defineEmits(['unauthorized']);
+const { isAdmin } = useAuth();
+const {
+    students, loading, saving, deletingId, formErrors, feedback,
+    loadStudents, saveStudent, deleteStudent,
+} = useStudents();
 
-const students = ref([]);
-const loading = ref(false);
-const saving = ref(false);
+// UI state for the add/edit form
 const showForm = ref(false);
 const editing = ref(null);
-const formErrors = ref({});
-const alert = ref(null);
-
-function notify(type, text) {
-    alert.value = { type, text };
-    setTimeout(() => (alert.value = null), 4000);
-}
-
-function handleError(e) {
-    if (e.status === 401) return emit('unauthorized'); 
-    if (e.status === 422) formErrors.value = e.errors || {}; 
-    notify('error', e.message);
-}
-
-async function loadStudents() {
-    loading.value = true;
-    try {
-        const res = await request('GET', '/students');
-        students.value = res.data;
-    } catch (e) {
-        handleError(e);
-    } finally {
-        loading.value = false;
-    }
-}
 
 function openAdd() {
     editing.value = null;
@@ -56,34 +34,14 @@ function closeForm() {
     editing.value = null;
 }
 
-async function saveStudent(payload) {
-    saving.value = true;
-    formErrors.value = {};
-    try {
-        if (editing.value) {
-            await request('PUT', `/students/${editing.value.id}`, payload);
-            notify('success', 'Student updated successfully.');
-        } else {
-            await request('POST', '/students', payload);
-            notify('success', 'Student added successfully.');
-        }
-        closeForm();
-        await loadStudents();
-    } catch (e) {
-        handleError(e);
-    } finally {
-        saving.value = false;
-    }
+async function onSave(payload) {
+    const saved = await saveStudent(payload, editing.value?.id);
+    if (saved) closeForm();
 }
 
-async function deleteStudent(student) {
-    if (!confirm(`Delete ${student.first_name} ${student.last_name}?`)) return;
-    try {
-        await request('DELETE', `/students/${student.id}`);
-        notify('success', 'Student deleted successfully.');
-        await loadStudents();
-    } catch (e) {
-        handleError(e);
+async function onDelete(student) {
+    if (confirm(`Delete ${student.first_name} ${student.last_name}?`)) {
+        await deleteStudent(student);
     }
 }
 
@@ -91,14 +49,16 @@ onMounted(loadStudents);
 </script>
 
 <template>
-    <AlertMessage v-if="alert" :type="alert.type" :text="alert.text" />
+    <SessionPanel />
+
+    <AlertMessage v-if="feedback" :type="feedback.type" :text="feedback.text" />
 
     <StudentForm
         v-if="showForm"
         :student="editing"
         :errors="formErrors"
         :saving="saving"
-        @save="saveStudent"
+        @save="onSave"
         @cancel="closeForm"
     />
 
@@ -110,15 +70,18 @@ onMounted(loadStudents);
             </button>
         </div>
 
-        <p v-if="!isAdmin" class="hint">You have view-only access. Only administrators can change records.</p>
+        <p v-if="!isAdmin" class="hint">
+            You have view-only access. Only administrators can change records.
+        </p>
         <p v-if="loading" class="empty">Loading students...</p>
 
         <StudentTable
             v-else
             :students="students"
             :is-admin="isAdmin"
+            :deleting-id="deletingId"
             @edit="openEdit"
-            @delete="deleteStudent"
+            @delete="onDelete"
         />
     </section>
 </template>
